@@ -1,0 +1,19 @@
+.yarnrc.yml
+  s_2be05ce0023947::t_629c9ff40ed2c1 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "b99db1828d17c87c14d465f5809becd792d2f38e",
+  "prompts": {},
+  "sessions": {
+    "s_2be05ce0023947": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "02b42ad9-4826-40f1-8bb5-37e423dacb62",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
