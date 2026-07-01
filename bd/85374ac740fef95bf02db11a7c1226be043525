@@ -1,0 +1,38 @@
+README.md
+  s_aee332f7638829::t_98742a5177be04 1,3,5-8,41-44,47-48,51-104
+  s_aee332f7638829::t_fb3dddeead945a 17-40
+  s_aee332f7638829::t_41146a8a63c8c5 9-16
+package.json
+  s_aee332f7638829::t_c7aa8de7d73ab0 20
+  s_aee332f7638829::t_98742a5177be04 10
+  s_aee332f7638829::t_eb856bd6e85865 67
+scripts/check-issue-readiness.mjs
+  s_aee332f7638829::t_be93fb917bfba4 63-65
+  s_aee332f7638829::t_9851dd7a761371 90-97
+  s_aee332f7638829::t_c7aa8de7d73ab0 1-62,66-81,85-89,98-108,112-131
+  s_aee332f7638829::t_41146a8a63c8c5 82-84,109-111
+.yarnrc.yml
+  s_aee332f7638829::t_eb856bd6e85865 3
+.yarn/releases/yarn-4.4.1.cjs
+  s_aee332f7638829::t_eb856bd6e85865 1-925
+app-config.arc.yaml
+  s_aee332f7638829::t_98742a5177be04 1-10
+yarn.lock
+  s_aee332f7638829::t_4a266aa69b7a90 15191,29966,29970,29976,29980
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "bd85374ac740fef95bf02db11a7c1226be043525",
+  "prompts": {},
+  "sessions": {
+    "s_aee332f7638829": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1fbf-234b-73e1-9512-0d02591dc1ce",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
