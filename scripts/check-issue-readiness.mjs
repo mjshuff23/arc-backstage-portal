@@ -109,6 +109,14 @@ check(
 );
 
 check(
+  'package exposes local security regression check',
+  () =>
+    packageJson.scripts?.['check:security'] ===
+    'node scripts/check-elliptic-cve-2025-14505.mjs',
+  'package.json should expose yarn check:security for the local elliptic CVE patch',
+);
+
+check(
   'default catalog keeps generated examples only',
   () =>
     appConfig.includes('../../examples/entities.yaml') &&

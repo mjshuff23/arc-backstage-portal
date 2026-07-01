@@ -54,7 +54,13 @@ The exact package graph is locked in `yarn.lock`. `.yarnrc.yml` sets `npmMinimal
 
 Known vulnerable transitive packages that had patched releases available have been moved forward in `yarn.lock`, including the PR #1 `protobufjs` bump and the previous `tar`, Octokit, `file-type`, `js-yaml`, `prismjs`, and `uuid` advisories.
 
-`yarn npm audit --all --recursive` can still report deprecation notices and the low-severity `elliptic` advisory through `browserify-sign`/`create-ecdh`; npm does not currently publish a patched `elliptic` release for that advisory path.
+The remaining GitHub Dependabot alert is the low-severity `elliptic` CVE-2025-14505 path through Backstage's development-time browser polyfills. npm does not currently publish a patched `elliptic` release for that advisory, so this repo carries a Yarn patch in `.yarn/patches/` and verifies the fixed nonce-truncation behavior with:
+
+```sh
+yarn check:security
+```
+
+Version-only scanners can still report `elliptic@6.6.1` because the upstream package version is unchanged, but the installed code path is patched and covered by the local regression check.
 
 ## Local Startup
 
@@ -112,6 +118,7 @@ The ARC catalog should ingest the root `catalog-info.yaml`, which fans out to th
 
 ```sh
 yarn check:issue
+yarn check:security
 yarn backstage-cli config:check --config app-config.yaml
 yarn backstage-cli config:check --config app-config.yaml --config app-config.arc.yaml
 ```
