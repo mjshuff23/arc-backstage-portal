@@ -27,41 +27,55 @@ const appConfig = readText('app-config.yaml');
 const arcConfigPath = 'app-config.arc.yaml';
 const hasArcConfig = fs.existsSync(path.join(root, arcConfigPath));
 const arcConfig = hasArcConfig ? readText(arcConfigPath) : '';
+const nodeVersion = readText('.node-version').trim();
+const nvmrc = readText('.nvmrc').trim();
 
 check(
-  'root package pins Node 22 or 24',
-  () => packageJson.engines?.node === '22 || 24',
-  'package.json engines.node should be exactly "22 || 24"',
+  'root package mirrors ARC Node baseline',
+  () => packageJson.engines?.node === '>=26.1.0',
+  'package.json engines.node should be exactly ">=26.1.0"',
 );
 
 check(
-  'root package pins Yarn 4.4.1',
-  () => packageJson.packageManager === 'yarn@4.4.1',
-  'package.json packageManager should be yarn@4.4.1',
+  'Node version files mirror ARC',
+  () => nodeVersion === '26.1.0' && nvmrc === '26',
+  '.node-version should be 26.1.0 and .nvmrc should be 26',
 );
 
 check(
-  'repo uses committed Yarn 4.4.1 release',
+  'root package pins Yarn 4.13.0',
+  () => packageJson.packageManager === 'yarn@4.13.0',
+  'package.json packageManager should be yarn@4.13.0',
+);
+
+check(
+  'repo uses committed Yarn 4.13.0 release',
   () =>
-    yarnrc.includes('yarnPath: .yarn/releases/yarn-4.4.1.cjs') &&
-    fs.existsSync(path.join(root, '.yarn/releases/yarn-4.4.1.cjs')),
-  '.yarnrc.yml should point at .yarn/releases/yarn-4.4.1.cjs and the release file should exist',
+    yarnrc.includes('yarnPath: .yarn/releases/yarn-4.13.0.cjs') &&
+    fs.existsSync(path.join(root, '.yarn/releases/yarn-4.13.0.cjs')),
+  '.yarnrc.yml should point at .yarn/releases/yarn-4.13.0.cjs and the release file should exist',
+);
+
+check(
+  'repo mirrors ARC immediate dependency adoption policy',
+  () => yarnrc.includes('npmMinimalAgeGate: 0'),
+  '.yarnrc.yml should set npmMinimalAgeGate: 0',
 );
 
 check(
   'Backstage version is recorded in backstage.json',
-  () => backstageJson.version === '1.52.0',
+  () => backstageJson.version === '1.53.0-next.1',
   'backstage.json should record the generated Backstage version',
 );
 
 check(
   'README documents required runtime versions',
   () =>
-    readme.includes('Node 22 or 24') &&
-    readme.includes('Yarn 4.4.1') &&
-    readme.includes('Backstage 1.52.0') &&
-    readme.includes('@backstage/cli 0.36.3') &&
-    readme.includes('TypeScript 5.8.3') &&
+    readme.includes('Node 26.1.0') &&
+    readme.includes('Yarn 4.13.0') &&
+    readme.includes('Backstage 1.53.0-next.1') &&
+    readme.includes('@backstage/cli 0.36.4-next.1') &&
+    readme.includes('TypeScript 6.0.3') &&
     readme.includes('React 18.3.1'),
   'README should list Node, Yarn, Backstage, and Backstage CLI versions',
 );
