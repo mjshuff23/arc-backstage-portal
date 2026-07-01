@@ -1,0 +1,32 @@
+scripts/check-elliptic-cve-2025-14505.mjs
+  s_aee332f7638829::t_83d5942bbd56fb 1-62
+package.json
+  s_aee332f7638829::t_dc7eec91bf456f 65-67
+  s_aee332f7638829::t_83d5942bbd56fb 25
+README.md
+  s_aee332f7638829::t_708e817f50e57a 57-63,121
+scripts/check-issue-readiness.mjs
+  s_aee332f7638829::t_708e817f50e57a 112-118
+  s_aee332f7638829::t_108a38b6377586 111
+.yarn/patches/elliptic-npm-6.6.1-87bb857cbc.patch
+  s_aee332f7638829::t_fcbee1aeb29d59 5
+  s_aee332f7638829::t_dc7eec91bf456f 1-4,6-18
+yarn.lock
+  s_aee332f7638829::t_28bb33a202052f 15960,15975-15989
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "465ef14550bfba39e11f5a393c97eb08e7f32ff6",
+  "prompts": {},
+  "sessions": {
+    "s_aee332f7638829": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1fbf-234b-73e1-9512-0d02591dc1ce",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
