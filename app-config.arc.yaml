@@ -1,0 +1,10 @@
+# Optional local ARC catalog ingestion.
+#
+# Backstage resolves file locations relative to the backend process working
+# directory, which is normally packages/backend during local development.
+catalog:
+  locations:
+    - type: file
+      target: ../../../agents-with-remote-control-mobile-controller/catalog-info.yaml
+      rules:
+        - allow: [Location]
