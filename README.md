@@ -122,6 +122,16 @@ If local ports are busy while using the ARC config, keep overrides out of git an
 yarn backstage-cli repo start --config ../../app-config.yaml --config ../../app-config.arc.yaml --config /tmp/app-config.local.yaml
 ```
 
+### TechDocs local requirements
+
+`arc-platform-docs` uses a `backstage.io/techdocs-ref: url:...` annotation, so TechDocs fetches ARC's `mkdocs.yml` and `docs/` tree from GitHub rather than from a local checkout. Two local prerequisites follow from `app-config.yaml`'s `techdocs` block:
+
+- **`GITHUB_TOKEN` must be set** in the environment `yarn start:arc` runs in. The ARC repository is private, so the `integrations.github` entry in `app-config.yaml` (`token: ${GITHUB_TOKEN}`) needs a real token with read access to fetch the docs source. Without it, the TechDocs build step fails to read from the ARC repository.
+- **Docker must be running locally.** `techdocs.generator.runIn` is set to `docker`, so the TechDocs backend shells out to Docker to run the `mkdocs-techdocs-core` build. If Docker isn't reachable (no daemon, no socket), the build step fails with an error like `This operation requires Docker. Docker does not appear to be available.` and the `arc-platform-docs` TechDocs page shows a "Build Details" error banner while still serving the last successfully generated version, if one exists in the local publisher cache.
+- If Docker isn't available in your setup, `techdocs.generator.runIn: local` is the documented alternative (requires local `mkdocs` and `mkdocs-techdocs-core` installed) — this repo does not switch to it by default; treat it as a fallback to test manually if Docker access is unreliable in your environment.
+
+To force a fresh TechDocs build (for example, after ARC's docs change upstream), restart `yarn start:arc` — the local publisher cache is not preserved across restarts — or use the settings/build-details control on the TechDocs page to inspect the most recent build attempt.
+
 ## Checks
 
 ```sh
