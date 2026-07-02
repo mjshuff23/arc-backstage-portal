@@ -47,7 +47,7 @@ function getBracketedValueAfter(source, marker) {
 }
 
 function hasFrontendFeature(source, featureName) {
-  return new RegExp(`\\b${featureName}\\b`).test(
+  return new RegExp(String.raw`\b${featureName}\b`).test(
     getBracketedValueAfter(source, 'features'),
   );
 }
@@ -63,16 +63,22 @@ function getAllowedCatalogKinds(configText) {
     );
   }
 
-  const blockMatch = configText.match(
-    /allow:\s*\n((?:\s*-\s*[A-Za-z]+\s*\n?)+)/,
-  );
-  if (blockMatch) {
-    return new Set(
-      [...blockMatch[1].matchAll(/-\s*([A-Za-z]+)/g)].map(match => match[1]),
-    );
+  const allowIndex = configText.indexOf('allow:');
+  if (allowIndex === -1) {
+    return new Set();
   }
 
-  return new Set();
+  const kinds = new Set();
+  const linesAfterAllow = configText.slice(allowIndex).split('\n').slice(1);
+  for (const line of linesAfterAllow) {
+    const itemMatch = line.match(/^\s*-\s*([A-Za-z]+)\s*$/);
+    if (!itemMatch) {
+      break;
+    }
+    kinds.add(itemMatch[1]);
+  }
+
+  return kinds;
 }
 
 function allowsCatalogKinds(configText, expectedKinds) {
