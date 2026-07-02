@@ -90,6 +90,7 @@ const packageJson = readJson('package.json');
 const backstageJson = readJson('backstage.json');
 const readme = readText('README.md');
 const appTsx = readText('packages/app/src/App.tsx');
+const appPackageJson = readJson('packages/app/package.json');
 const yarnrc = readText('.yarnrc.yml');
 const appConfig = readText('app-config.yaml');
 const arcConfigPath = 'app-config.arc.yaml';
@@ -175,6 +176,21 @@ check(
     readme.includes('Docker') &&
     readme.includes('generator.runIn'),
   'README should document that GITHUB_TOKEN and a running Docker daemon are required for local TechDocs generation against the private ARC repo',
+);
+
+check(
+  'app package includes API Docs plugin',
+  () => Boolean(appPackageJson.dependencies?.['@backstage/plugin-api-docs']),
+  'packages/app/package.json should depend on @backstage/plugin-api-docs so api:default/arc-backend-openapi can render',
+);
+
+check(
+  'README documents API Docs/OpenAPI validation path',
+  () =>
+    readme.includes('arc-backend-openapi') &&
+    readme.includes('openapi:generate') &&
+    readme.includes('servers: []'),
+  'README should document the API Docs entity, how to regenerate the ARC OpenAPI artifact, and the servers: [] contract-only behavior',
 );
 
 check(
