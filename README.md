@@ -132,6 +132,15 @@ yarn backstage-cli repo start --config ../../app-config.yaml --config ../../app-
 
 To force a fresh TechDocs build (for example, after ARC's docs change upstream), restart `yarn start:arc` — the local publisher cache is not preserved across restarts — or use the settings/build-details control on the TechDocs page to inspect the most recent build attempt.
 
+### API Docs local requirements
+
+`api:default/arc-backend-openapi` renders ARC's committed OpenAPI artifact (`docs/openapi/arc-backend.openapi.json`) through Backstage API Docs. `@backstage/plugin-api-docs` is included via `app.packages: all` in `app-config.yaml`; no explicit frontend plugin registration is needed (unlike TechDocs above), and API Docs renders out of the box once the entity is ingested.
+
+- The `api:default/arc-backend-openapi` descriptor in ARC's `backstage/catalog/apis.yaml` uses `definition.$text` pointed at a GitHub blob URL, so the same `GITHUB_TOKEN` requirement documented above for TechDocs applies here too — the ARC repository is private.
+- The committed artifact is regenerated in the ARC repo with `pnpm openapi:generate`, which writes `docs/openapi/arc-backend.openapi.json` deterministically from the live NestJS Swagger document. Backstage always reads the committed file, never a live `/docs-json` endpoint, so the artifact must be regenerated and committed on the ARC side for API Docs to reflect route changes.
+- The artifact has `servers: []` set intentionally. API Docs still renders paths, schemas, and security metadata correctly with no servers configured, but the "Try it out" button on each operation falls back to Backstage's own origin as the request target rather than a real ARC backend — API Docs here is for **contract discovery, not live API calls**. Don't rely on "Try it out" for anything other than inspecting a request's shape.
+- A handful of request/response DTO schemas render as empty objects in the artifact (decorators not yet added on those DTOs). This doesn't block rendering; it's a known gap, not a bug — see the OpenAPI artifact's `components.schemas` if you need to check which ones.
+
 ## Checks
 
 ```sh
