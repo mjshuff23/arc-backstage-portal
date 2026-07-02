@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "backstage-cli repo start",
-    "start:arc": "backstage-cli repo start --config app-config.yaml --config app-config.arc.yaml",
+    "start:arc": "backstage-cli repo start --config ../../app-config.yaml --config ../../app-config.arc.yaml",
     "build:backend": "yarn workspace backend build",
     "build:all": "backstage-cli repo build --all",
     "build-image": "yarn workspace backend build-image",
@@ -64,7 +64,8 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "elliptic@npm:^6.5.3": "patch:elliptic@npm%3A6.6.1#~/.yarn/patches/elliptic-npm-6.6.1-87bb857cbc.patch",
-    "elliptic@npm:^6.6.1": "patch:elliptic@npm%3A6.6.1#~/.yarn/patches/elliptic-npm-6.6.1-87bb857cbc.patch"
+    "elliptic@npm:^6.6.1": "patch:elliptic@npm%3A6.6.1#~/.yarn/patches/elliptic-npm-6.6.1-87bb857cbc.patch",
+    "@material-table/core@npm:^3.1.0": "patch:@material-table/core@npm%3A3.2.5#~/.yarn/patches/@material-table-core-npm-3.2.5-5a76f950c0.patch"
   },
   "prettier": "@backstage/cli/config/prettier",
   "lint-staged": {
