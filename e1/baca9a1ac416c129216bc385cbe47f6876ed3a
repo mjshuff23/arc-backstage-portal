@@ -1,0 +1,26 @@
+packages/app/src/App.tsx
+  s_e06796e4a64013::t_818126c617e1c8 3,8
+README.md
+  s_e06796e4a64013::t_dcf320eb3b3b29 144-192
+scripts/check-issue-readiness.mjs
+  s_e06796e4a64013::t_8ab05bd720099b 136-137,243-248,283-285,290-296,299-305,308-314,323-328,335-340,349-350
+  s_e06796e4a64013::t_1c942fefbe17ad 55-62,69-76,95-96,146-156,297-298,306-307,316-322,330-334,342-348
+  s_e06796e4a64013::t_09b39b044d6a89 63-68,77-94,145,286-289,315,329,341
+  s_e06796e4a64013::t_7049f7fa30ac44 351
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "e1baca9a1ac416c129216bc385cbe47f6876ed3a",
+  "prompts": {},
+  "sessions": {
+    "s_e06796e4a64013": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f234a-c485-7a83-9552-854de9b25875",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
