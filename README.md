@@ -190,6 +190,93 @@ TechDocs search depends on readable generated TechDocs content. For a fresh cach
 
 Search is intentionally limited to public-ish portal surfaces: Catalog entities, API entity metadata, and generated TechDocs. It must not index ARC runtime task state, raw agent logs, provider payloads, MCP request/response bodies, local absolute paths, database files, session cookies, provider tokens, controller secrets, or personal Tailnet URLs.
 
+## Read-only MCP context for coding agents
+
+The portal exposes a single focused MCP server so coding agents can use Backstage as a curated, read-only map of ARC's platform model. It is served by `@backstage/plugin-mcp-actions-backend` over Streamable HTTP:
+
+```text
+http://localhost:7007/api/mcp-actions/v1/arc-catalog
+```
+
+Because `mcpActions.servers` is configured, the per-server endpoint replaces the plugin's single default endpoint — `/api/mcp-actions/v1` returns 404, so no endpoint exposes the full actions registry. SSE is deprecated upstream and is not used here.
+
+### Exposed actions
+
+The `arc-catalog` server uses an explicit id allowlist instead of wildcards so a new write action introduced by a Backstage upgrade cannot appear silently:
+
+| MCP tool                                | What it answers                                                              |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| `catalog.get-catalog-model-description` | Which entity kinds, annotations, and relations the catalog models            |
+| `catalog.get-catalog-entity`            | One entity with ownership, system, and relation refs                         |
+| `catalog.query-catalog-entities`        | Filtered entity queries (components, APIs, systems, resources)               |
+| `catalog.validate-entity`               | Whether a candidate entity body is valid                                     |
+| `search.query`                          | Catalog and TechDocs search pointers (`types: software-catalog`, `techdocs`) |
+
+### Intentionally not exposed
+
+- All `scaffolder:*` actions (template execution, dry runs, task logs). Scaffolder can create repos and write changes; exposing it to agents requires a separate safety review.
+- `catalog:register-entity` and `catalog:unregister-entity` (catalog writes). Note that `register-entity` is **not** flagged `destructive` upstream, so an attribute-based `exclude: {attributes: {destructive: true}}` filter would not catch it — the explicit id excludes are load-bearing.
+- `auth:who-am-i` (kept out to hold the first server to catalog/search/docs context only).
+- `mcpActions.tracing.capture.toolPayload` stays at its default (`false`); captured tool arguments/results can contain sensitive information.
+
+The TechDocs backend currently registers no actions at all, so there is no `techdocs:*` id to include; TechDocs pointers come from `search.query` with `types: ["techdocs"]` and from catalog entity annotations. If richer TechDocs/API-docs actions are needed, that is a follow-up for custom read-only Backstage actions.
+
+Upstream annotation quirk worth knowing: `search:query` is annotated `readOnlyHint: true` but `destructiveHint: true`, so a blanket destructive-attribute exclude would silently drop it. The allowlist avoids relying on those attributes.
+
+### MCP client access (local/dev bridge only)
+
+External client access uses a static bearer token. This is documented by Backstage as a temporary workaround until stronger auth/device flows land — treat it as a local development bridge, never a production posture.
+
+1. Generate a token and export it (never commit or print the value):
+
+   ```sh
+   export BACKSTAGE_MCP_TOKEN=$(node -p 'require("crypto").randomBytes(24).toString("base64")')
+   ```
+
+2. Start the portal with the MCP access config layered on top of the ARC ingestion configs:
+
+   ```sh
+   yarn start:arc:mcp
+   ```
+
+   The committed `app-config.mcp-local.yaml` reads the token from the environment and restricts it to the `mcp-actions` and `catalog` plugins. The default `yarn start` and `yarn start:arc` paths do not load this file, so the portal boots with no MCP client access configured.
+
+3. Point an MCP-capable client at the focused endpoint:
+
+   ```json
+   {
+     "mcpServers": {
+       "arc-backstage-catalog": {
+         "type": "http",
+         "url": "http://localhost:7007/api/mcp-actions/v1/arc-catalog",
+         "headers": {
+           "Authorization": "Bearer ${BACKSTAGE_MCP_TOKEN}"
+         }
+       }
+     }
+   }
+   ```
+
+Requests without the token receive `401`. MCP server keys must be lowercase alphanumeric with hyphens (`arc-catalog`, not `arcCatalog`); the plugin refuses to start otherwise.
+
+Local-ingestion caveat: with `yarn start:arc:mcp`, entity `backstage.io/managed-by-location` annotations contain local absolute file paths because ARC catalog ingestion reads a sibling checkout. That is acceptable for this local bridge but is another reason this configuration must not be exposed beyond localhost.
+
+### When agents should use which source
+
+```text
+ARC code-intelligence MCP (pnpm agent:mcp in the ARC repo):
+  code paths, symbols, imports, tests, chunks, module boundaries
+
+Backstage MCP (this portal, arc-catalog server):
+  catalog entities, ownership, system/API/resource relationships,
+  API definitions, TechDocs/search pointers
+
+GitHub / files:
+  source of truth for actual implementation diffs
+```
+
+Backstage MCP answers "what is this service/system/API/doc in the platform model?"; ARC code-intelligence answers "where is this code?". Neither grants any write path into ARC or the portal.
+
 ## Checks
 
 ```sh
@@ -197,6 +284,7 @@ yarn check:issue
 yarn check:security
 yarn backstage-cli config:check --config app-config.yaml
 yarn backstage-cli config:check --config app-config.yaml --config app-config.arc.yaml
+yarn backstage-cli config:check --config app-config.yaml --config app-config.arc.yaml --config app-config.mcp-local.yaml
 ```
 
-`yarn check:issue` verifies this repository still matches the companion-repo requirements: standalone Yarn workspace, ARC-aligned Node/Yarn/Backstage documentation, default ARC-free boot config, and optional ARC catalog ingestion setup.
+`yarn check:issue` verifies this repository still matches the companion-repo requirements: standalone Yarn workspace, ARC-aligned Node/Yarn/Backstage documentation, default ARC-free boot config, optional ARC catalog ingestion setup, and the read-only MCP server shape (explicit allowlist, scaffolder and catalog writes excluded, env-var-based client token, payload tracing off).
