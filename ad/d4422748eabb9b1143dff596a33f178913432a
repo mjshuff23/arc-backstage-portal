@@ -1,0 +1,34 @@
+package.json
+  s_d930eec42bb99e::t_2c839c70921b63 11
+app-config.mcp-local.yaml
+  s_d930eec42bb99e::t_2a3c59a8105f2f 1-29
+README.md
+  s_d930eec42bb99e::t_45d32acdf72c8e 287,290
+  s_d930eec42bb99e::t_0ced1457a663fb 193-279
+app-config.yaml
+  s_d930eec42bb99e::t_7f83df63e6f84d 166-174,176-182,185-186
+  s_d930eec42bb99e::t_78a8de0505e144 43-48,54
+  s_d930eec42bb99e::t_8a6d30378552e6 153-154,156-157,162
+  s_d930eec42bb99e::t_3f1feb850ea49e 150-152,155,158-159,161,163-165,175,183-184
+scripts/check-issue-readiness.mjs
+  s_d930eec42bb99e::t_6612b494084bc8 440-443,449
+  s_d930eec42bb99e::t_1e40b82eb886e5 383-386,391,393
+  s_d930eec42bb99e::t_a69e82d43309f4 387-390,392,394
+  s_d930eec42bb99e::t_a755b0316229b6 379-382,395-439,444-448,450-484
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "add4422748eabb9b1143dff596a33f178913432a",
+  "prompts": {},
+  "sessions": {
+    "s_d930eec42bb99e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1791c39c-0d97-4590-abb1-89c870b37782",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
