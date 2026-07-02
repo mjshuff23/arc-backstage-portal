@@ -114,6 +114,14 @@ For a different local checkout layout, copy `app-config.arc.yaml` to an ignored 
 
 The ARC catalog should ingest the root `catalog-info.yaml`, which fans out to the ARC catalog descriptors under `backstage/catalog/`, including the ARC components, resources, systems, ownership, and API entity metadata.
 
+The ARC startup command uses package-relative config paths because `backstage-cli repo start` runs app and backend package processes from their package directories. The optional ARC config allows ARC's `Component`, `API`, `Location`, `Group`, `Domain`, `System`, and `Resource` entities without adding ARC data to the default `yarn start` path.
+
+If local ports are busy while using the ARC config, keep overrides out of git and pass the ignored or temporary config explicitly, for example:
+
+```sh
+yarn backstage-cli repo start --config ../../app-config.yaml --config ../../app-config.arc.yaml --config /tmp/app-config.local.yaml
+```
+
 ## Checks
 
 ```sh

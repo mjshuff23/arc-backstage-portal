@@ -7,4 +7,4 @@ catalog:
     - type: file
       target: ../../../agents-with-remote-control-mobile-controller/catalog-info.yaml
       rules:
-        - allow: [Location]
+        - allow: [Component, API, Location, Group, Domain, System, Resource]

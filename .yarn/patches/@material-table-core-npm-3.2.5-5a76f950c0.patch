@@ -1,0 +1,22 @@
+diff --git a/dist/utils/data-manager.js b/dist/utils/data-manager.js
+index 8043d84c9ea9e83fca205bef32e26ab94898986e..0200a5afc2b1a5bbd64836d8c655bbbd513bdf03 100644
+--- a/dist/utils/data-manager.js
++++ b/dist/utils/data-manager.js
+@@ -17,7 +17,7 @@ var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/de
+ 
+ var _format = _interopRequireDefault(require("date-fns/format"));
+ 
+-var _uuid = _interopRequireDefault(require("uuid"));
++var _uuid = require("uuid");
+ 
+ var _2 = require("./");
+ 
+@@ -331,7 +331,7 @@ var DataManager = /*#__PURE__*/function () {
+           id: row.id || index,
+           // `uuid` acts as our 'key' and is generated when new data
+           // is passed into material-table externally.
+-          uuid: row.uuid || _uuid["default"].v4()
++          uuid: row.uuid || _uuid.v4()
+         }, prevTableData), row.tableData);
+ 
+         if (tableData.checked) {

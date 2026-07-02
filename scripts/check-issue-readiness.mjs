@@ -19,9 +19,77 @@ function check(name, predicate, detail) {
   checks.push({ name, passed: Boolean(predicate()), detail });
 }
 
+function getBracketedValueAfter(source, marker) {
+  const markerIndex = source.indexOf(marker);
+  if (markerIndex === -1) {
+    return '';
+  }
+
+  const openIndex = source.indexOf('[', markerIndex);
+  if (openIndex === -1) {
+    return '';
+  }
+
+  let depth = 0;
+  for (let index = openIndex; index < source.length; index += 1) {
+    const character = source[index];
+    if (character === '[') {
+      depth += 1;
+    } else if (character === ']') {
+      depth -= 1;
+      if (depth === 0) {
+        return source.slice(openIndex + 1, index);
+      }
+    }
+  }
+
+  return '';
+}
+
+function hasFrontendFeature(source, featureName) {
+  return new RegExp(String.raw`\b${featureName}\b`).test(
+    getBracketedValueAfter(source, 'features'),
+  );
+}
+
+function getAllowedCatalogKinds(configText) {
+  const inlineMatch = configText.match(/allow:\s*\[([^\]]*)\]/);
+  if (inlineMatch) {
+    return new Set(
+      inlineMatch[1]
+        .split(',')
+        .map(kind => kind.trim())
+        .filter(Boolean),
+    );
+  }
+
+  const allowIndex = configText.indexOf('allow:');
+  if (allowIndex === -1) {
+    return new Set();
+  }
+
+  const kinds = new Set();
+  const linesAfterAllow = configText.slice(allowIndex).split('\n').slice(1);
+  for (const line of linesAfterAllow) {
+    const itemMatch = line.match(/^\s*-\s*([A-Za-z]+)\s*$/);
+    if (!itemMatch) {
+      break;
+    }
+    kinds.add(itemMatch[1]);
+  }
+
+  return kinds;
+}
+
+function allowsCatalogKinds(configText, expectedKinds) {
+  const allowedKinds = getAllowedCatalogKinds(configText);
+  return expectedKinds.every(kind => allowedKinds.has(kind));
+}
+
 const packageJson = readJson('package.json');
 const backstageJson = readJson('backstage.json');
 const readme = readText('README.md');
+const appTsx = readText('packages/app/src/App.tsx');
 const yarnrc = readText('.yarnrc.yml');
 const appConfig = readText('app-config.yaml');
 const arcConfigPath = 'app-config.arc.yaml';
@@ -104,8 +172,8 @@ check(
   'package exposes optional ARC startup command',
   () =>
     packageJson.scripts?.['start:arc'] ===
-    'backstage-cli repo start --config app-config.yaml --config app-config.arc.yaml',
-  'package.json should expose yarn start:arc without changing the default yarn start',
+    'backstage-cli repo start --config ../../app-config.yaml --config ../../app-config.arc.yaml',
+  'package.json should expose yarn start:arc with package-relative config paths without changing the default yarn start',
 );
 
 check(
@@ -114,6 +182,15 @@ check(
     packageJson.scripts?.['check:security'] ===
     'node scripts/check-elliptic-cve-2025-14505.mjs',
   'package.json should expose yarn check:security for the local elliptic CVE patch',
+);
+
+check(
+  'frontend registers TechDocs plugin',
+  () =>
+    appTsx.includes(
+      "import techDocsPlugin from '@backstage/plugin-techdocs/alpha';",
+    ) && hasFrontendFeature(appTsx, 'techDocsPlugin'),
+  'packages/app/src/App.tsx should register TechDocs so ARC docs routes render',
 );
 
 check(
@@ -131,8 +208,16 @@ check(
     arcConfig.includes(
       '../../../agents-with-remote-control-mobile-controller/catalog-info.yaml',
     ) &&
-    arcConfig.includes('allow: [Location]'),
-  'app-config.arc.yaml should register the neighboring ARC catalog-info.yaml as an optional Location',
+    allowsCatalogKinds(arcConfig, [
+      'Component',
+      'API',
+      'Location',
+      'Group',
+      'Domain',
+      'System',
+      'Resource',
+    ]),
+  'app-config.arc.yaml should register the neighboring ARC catalog-info.yaml and allow every ARC catalog kind',
 );
 
 const failed = checks.filter(item => !item.passed);
