@@ -1,0 +1,44 @@
+README.md
+  s_6b8a1f5b7df5c1::t_e41f4e41512847 117-124
+.yarn/patches/@material-table-core-npm-3.2.5-5a76f950c0.patch
+  s_6b8a1f5b7df5c1::t_a9c216fad4b9b9 1-22
+app-config.arc.yaml
+  s_6b8a1f5b7df5c1::t_e41f4e41512847 10
+scripts/check-issue-readiness.mjs
+  s_6b8a1f5b7df5c1::t_ec8de39ed4f70e 22-45
+  s_aee332f7638829::t_7985b4d009fb45 61
+  s_aee332f7638829::t_c7aa8de7d73ab0 46-48,50-54,57,156-164,180-189
+  s_6b8a1f5b7df5c1::t_d2633110118825 49,144-145
+  s_aee332f7638829::t_74d929a61d530d 55-56
+package.json
+  s_6b8a1f5b7df5c1::t_4aa80a83e79094 67-68
+  s_6b8a1f5b7df5c1::t_e41f4e41512847 10
+packages/app/src/App.tsx
+  s_6b8a1f5b7df5c1::t_1dda505b8990e1 3,7
+yarn.lock
+  s_6b8a1f5b7df5c1::t_8cd3cff3cd10d5 6331,6356-6380
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "4675507df99788742d58c0829fec0656a7ae01a0",
+  "prompts": {},
+  "sessions": {
+    "s_6b8a1f5b7df5c1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f2032-4aa8-7041-b239-bcc08b2a6492",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    },
+    "s_aee332f7638829": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1fbf-234b-73e1-9512-0d02591dc1ce",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
