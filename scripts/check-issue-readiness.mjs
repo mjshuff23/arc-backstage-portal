@@ -169,6 +169,15 @@ check(
 );
 
 check(
+  'README documents TechDocs local requirements',
+  () =>
+    readme.includes('GITHUB_TOKEN') &&
+    readme.includes('Docker') &&
+    readme.includes('generator.runIn'),
+  'README should document that GITHUB_TOKEN and a running Docker daemon are required for local TechDocs generation against the private ARC repo',
+);
+
+check(
   'package exposes optional ARC startup command',
   () =>
     packageJson.scripts?.['start:arc'] ===
