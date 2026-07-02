@@ -1,0 +1,19 @@
+scripts/check-issue-readiness.mjs
+  s_e06796e4a64013::t_bfb93d8a8c6ae6 56,81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "39275ad45d0b9869de138c4012ed81fc43b7b16f",
+  "prompts": {},
+  "sessions": {
+    "s_e06796e4a64013": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f234a-c485-7a83-9552-854de9b25875",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
