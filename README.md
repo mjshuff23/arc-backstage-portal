@@ -141,6 +141,55 @@ To force a fresh TechDocs build (for example, after ARC's docs change upstream),
 - The artifact has `servers: []` set intentionally. API Docs still renders paths, schemas, and security metadata correctly with no servers configured, but the "Try it out" button on each operation falls back to Backstage's own origin as the request target rather than a real ARC backend — API Docs here is for **contract discovery, not live API calls**. Don't rely on "Try it out" for anything other than inspecting a request's shape.
 - A handful of request/response DTO schemas render as empty objects in the artifact (decorators not yet added on those DTOs). This doesn't block rendering; it's a known gap, not a bug — see the OpenAPI artifact's `components.schemas` if you need to check which ones.
 
+## Search local validation
+
+`@backstage/plugin-search` is explicitly registered in `packages/app/src/App.tsx` so the generated app exposes the Search page and sidebar/modal affordance. `@backstage/plugin-search-react` is provided by `@backstage/plugin-search` and the app does not import it directly; add it as a direct app dependency only if app source starts importing from that package.
+
+Start the portal with ARC catalog ingestion:
+
+```sh
+yarn start:arc
+```
+
+Then sign in as the guest user and open `/search`. If `3000` is busy, use a local config override as shown above and open the matching app URL. The Search backend schedules initial indexing with a short delay and then repeats on a cadence, so wait for backend log lines like:
+
+```text
+Collating documents for software-catalog succeeded
+Collating documents for techdocs succeeded
+```
+
+The current local config uses `better-sqlite3`, not Postgres. The installed Postgres search module is harmless in this local shape: startup logs that Postgres search is not supported and skips `search-backend-module-pg`. Do not switch local development to Postgres for this validation path. Backstage's zero-config local search path is the expected local engine behavior here.
+
+Smoke these Catalog queries, using the "Software Catalog" result type filter if TechDocs results rank above exact entity matches:
+
+```text
+arc-orchestrator -> /catalog/default/component/arc-orchestrator
+arc-controller -> /catalog/default/component/arc-controller
+arc-platform-docs -> /catalog/default/component/arc-platform-docs
+arc-backend-openapi -> /catalog/default/api/arc-backend-openapi
+arc-platform -> /catalog/default/system/arc-platform
+ai-agent-operations -> /catalog/default/domain/ai-agent-operations
+```
+
+Smoke these TechDocs queries with the "Documentation" result type filter:
+
+```text
+local-first
+agent-context
+approval gates
+provider integrations
+Backstage Integration Research Plan
+MCP
+OpenAPI
+TechDocs
+```
+
+Expected TechDocs results route under `/docs/default/component/arc-platform-docs/...`; open at least one result, such as the approval gate or quality gates page, to confirm the reader route works.
+
+TechDocs search depends on readable generated TechDocs content. For a fresh cache, `GITHUB_TOKEN` must let Backstage read the private ARC repo and Docker must be reachable because `techdocs.generator.runIn` is `docker`. If GitHub DNS/token access or Docker is unavailable, catalog search should still work, while TechDocs generation may fail or search may only reflect previously cached local publisher content.
+
+Search is intentionally limited to public-ish portal surfaces: Catalog entities, API entity metadata, and generated TechDocs. It must not index ARC runtime task state, raw agent logs, provider payloads, MCP request/response bodies, local absolute paths, database files, session cookies, provider tokens, controller secrets, or personal Tailnet URLs.
+
 ## Checks
 
 ```sh

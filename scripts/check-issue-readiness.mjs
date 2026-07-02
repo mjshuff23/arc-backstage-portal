@@ -52,6 +52,48 @@ function hasFrontendFeature(source, featureName) {
   );
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
+}
+
+function hasPackageDependency(packageJson, packageName) {
+  return Boolean(packageJson.dependencies?.[packageName]);
+}
+
+function hasDefaultImport(source, importedName, packageName) {
+  return new RegExp(
+    String.raw`import\s+${escapeRegExp(importedName)}\s+from\s+['"]${escapeRegExp(packageName)}['"]\s*;?`,
+  ).test(source);
+}
+
+function hasBackendRegistration(source, packageName) {
+  return new RegExp(
+    String.raw`backend\.add\(\s*import\(\s*['"]${escapeRegExp(packageName)}['"]\s*\)\s*\)`,
+  ).test(source);
+}
+
+function matchesAll(source, patterns) {
+  return patterns.every(pattern => pattern.test(source));
+}
+
+function getMarkdownSection(source, headingPattern) {
+  const headingMatch = headingPattern.exec(source);
+  if (headingMatch?.index === undefined) {
+    return '';
+  }
+
+  const sectionStart = headingMatch.index;
+  const contentStart = sectionStart + headingMatch[0].length;
+  const sectionRest = source.slice(contentStart);
+  const nextHeadingIndex = sectionRest.search(/^##\s+/m);
+
+  if (nextHeadingIndex === -1) {
+    return source.slice(sectionStart);
+  }
+
+  return source.slice(sectionStart, contentStart + nextHeadingIndex);
+}
+
 function getAllowedCatalogKinds(configText) {
   const inlineMatch = configText.match(/allow:\s*\[([^\]]*)\]/);
   if (inlineMatch) {
@@ -91,6 +133,8 @@ const backstageJson = readJson('backstage.json');
 const readme = readText('README.md');
 const appTsx = readText('packages/app/src/App.tsx');
 const appPackageJson = readJson('packages/app/package.json');
+const backendPackageJson = readJson('packages/backend/package.json');
+const backendIndex = readText('packages/backend/src/index.ts');
 const yarnrc = readText('.yarnrc.yml');
 const appConfig = readText('app-config.yaml');
 const arcConfigPath = 'app-config.arc.yaml';
@@ -98,6 +142,18 @@ const hasArcConfig = fs.existsSync(path.join(root, arcConfigPath));
 const arcConfig = hasArcConfig ? readText(arcConfigPath) : '';
 const nodeVersion = readText('.node-version').trim();
 const nvmrc = readText('.nvmrc').trim();
+const searchReadmeSection = getMarkdownSection(readme, /^##\s+Search\b.*$/m);
+const requiredBackendSearchDeps = [
+  '@backstage/plugin-search-backend',
+  '@backstage/plugin-search-backend-module-catalog',
+  '@backstage/plugin-search-backend-module-techdocs',
+  '@backstage/plugin-search-backend-module-pg',
+];
+const requiredBackendSearchRegistrations = [
+  '@backstage/plugin-search-backend',
+  '@backstage/plugin-search-backend-module-catalog',
+  '@backstage/plugin-search-backend-module-techdocs',
+];
 
 check(
   'root package mirrors ARC Node baseline',
@@ -185,6 +241,12 @@ check(
 );
 
 check(
+  'app package includes Search plugin',
+  () => Boolean(appPackageJson.dependencies?.['@backstage/plugin-search']),
+  'packages/app/package.json should depend on @backstage/plugin-search so /search and the search modal can render',
+);
+
+check(
   'README documents API Docs/OpenAPI validation path',
   () =>
     readme.includes('arc-backend-openapi') &&
@@ -216,6 +278,75 @@ check(
       "import techDocsPlugin from '@backstage/plugin-techdocs/alpha';",
     ) && hasFrontendFeature(appTsx, 'techDocsPlugin'),
   'packages/app/src/App.tsx should register TechDocs so ARC docs routes render',
+);
+
+check(
+  'frontend registers Search plugin',
+  () =>
+    hasDefaultImport(
+      appTsx,
+      'searchPlugin',
+      '@backstage/plugin-search/alpha',
+    ) && hasFrontendFeature(appTsx, 'searchPlugin'),
+  'packages/app/src/App.tsx should register Search explicitly so /search renders in this generated app',
+);
+
+check(
+  'backend package includes Search backend and built-in collators',
+  () =>
+    requiredBackendSearchDeps.every(packageName =>
+      hasPackageDependency(backendPackageJson, packageName),
+    ),
+  'packages/backend/package.json should include the search backend, catalog collator, TechDocs collator, and currently installed Postgres engine module',
+);
+
+check(
+  'backend registers Search backend and built-in collators',
+  () =>
+    requiredBackendSearchRegistrations.every(packageName =>
+      hasBackendRegistration(backendIndex, packageName),
+    ),
+  'packages/backend/src/index.ts should register search backend plus catalog and TechDocs collators',
+);
+
+check(
+  'README documents Search local validation path',
+  () =>
+    matchesAll(searchReadmeSection, [
+      /^##\s+Search\b/m,
+      /\/search\b/,
+      /\barc-orchestrator\b/,
+      /\bapproval\s+gates\b/i,
+      /software-catalog[\s\S]{0,120}succeeded|succeeded[\s\S]{0,120}software-catalog/i,
+      /techdocs[\s\S]{0,120}succeeded|succeeded[\s\S]{0,120}techdocs/i,
+    ]),
+  'README should document /search, representative catalog and TechDocs queries, and the collator timing caveat',
+);
+
+check(
+  'README documents local Search engine behavior',
+  () =>
+    matchesAll(searchReadmeSection, [
+      /better-sqlite3|sqlite/i,
+      /Postgres/i,
+      /not supported|skips?|disabled/i,
+      /zero[- ]config|local search/i,
+    ]),
+  'README should document local SQLite behavior and why the Postgres module is skipped locally',
+);
+
+check(
+  'README documents Search sensitive-data exclusions',
+  () =>
+    matchesAll(searchReadmeSection, [
+      /\bagent logs?\b/i,
+      /\bprovider payloads?\b/i,
+      /\bMCP\b[\s\S]{0,80}\brequest\/response bodies\b/i,
+      /\bsession cookies?\b/i,
+      /\bprovider tokens?\b/i,
+      /\blocal absolute paths?\b/i,
+    ]),
+  'README should document that raw ARC runtime/provider/MCP payloads and other private runtime data are not indexed',
 );
 
 check(
