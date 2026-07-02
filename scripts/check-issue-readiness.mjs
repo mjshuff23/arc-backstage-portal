@@ -53,7 +53,7 @@ function hasFrontendFeature(source, featureName) {
 }
 
 function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 }
 
 function hasPackageDependency(packageJson, packageName) {
@@ -78,7 +78,7 @@ function matchesAll(source, patterns) {
 
 function getMarkdownSection(source, headingPattern) {
   const headingMatch = headingPattern.exec(source);
-  if (!headingMatch || headingMatch.index === undefined) {
+  if (headingMatch?.index === undefined) {
     return '';
   }
 
