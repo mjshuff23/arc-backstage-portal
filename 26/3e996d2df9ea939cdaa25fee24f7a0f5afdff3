@@ -1,0 +1,19 @@
+scripts/check-issue-readiness.mjs
+  s_54991c63f16a95::t_516b2c78aab162 50,66-78,81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "263e996d2df9ea939cdaa25fee24f7a0f5afdff3",
+  "prompts": {},
+  "sessions": {
+    "s_54991c63f16a95": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "494028e7-0ffa-4412-9e71-c14c6cc3fabd",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
