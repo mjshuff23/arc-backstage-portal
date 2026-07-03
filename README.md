@@ -239,7 +239,7 @@ External client access uses a static bearer token. This is documented by Backsta
    yarn start:arc:mcp
    ```
 
-   The committed `app-config.mcp-local.yaml` reads the token from the environment and restricts it to the `mcp-actions` and `catalog` plugins. The default `yarn start` and `yarn start:arc` paths do not load this file, so the portal boots with no MCP client access configured.
+   The committed `app-config.mcp-local.yaml` reads the token from the environment and restricts it to the `mcp-actions` plugin only — the MCP actions backend invokes catalog/search actions with its own service identity, so the client token gets `403` if pointed at the catalog or search REST APIs directly. The default `yarn start` and `yarn start:arc` paths do not load this file, so the portal boots with no MCP client access configured.
 
 3. Point an MCP-capable client at the focused endpoint:
 

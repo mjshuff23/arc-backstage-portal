@@ -461,10 +461,12 @@ check(
   () =>
     hasMcpLocalConfig &&
     mcpLocalConfig.includes('${BACKSTAGE_MCP_TOKEN}') &&
+    mcpLocalConfig.includes('subject: arc-mcp-client') &&
     mcpLocalConfig.includes('externalAccess') &&
     mcpLocalConfig.includes('accessRestrictions') &&
-    mcpLocalConfig.includes('plugin: mcp-actions'),
-  'app-config.mcp-local.yaml should grant static-token access via the BACKSTAGE_MCP_TOKEN env var with access restricted to the mcp-actions and catalog plugins',
+    mcpLocalConfig.includes('plugin: mcp-actions') &&
+    !mcpLocalConfig.includes('plugin: catalog'),
+  'app-config.mcp-local.yaml should grant static-token access via the BACKSTAGE_MCP_TOKEN env var under the arc-mcp-client subject, restricted to the mcp-actions plugin only (downstream actions run under the plugin service identity)',
 );
 
 check(

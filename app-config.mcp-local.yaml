@@ -22,8 +22,10 @@ backend:
         options:
           token: ${BACKSTAGE_MCP_TOKEN}
           subject: arc-mcp-client
-        # Limit what this token can reach: the MCP actions endpoint itself and
-        # the catalog plugin the read-only actions proxy to.
+        # Limit the token to the MCP actions endpoint only. The mcp-actions
+        # plugin invokes catalog/search actions with its own service
+        # identity, so the external token needs no direct reach into those
+        # plugins (verified at runtime: catalog and search tools work with
+        # this restriction in place).
         accessRestrictions:
           - plugin: mcp-actions
-          - plugin: catalog
