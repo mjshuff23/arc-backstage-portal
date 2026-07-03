@@ -386,8 +386,8 @@ function getFilterIds(block) {
 
 // Match the YAML keys on their own lines so prose in comments (which can
 // mention include:/exclude:) does not shift the slice boundaries.
-const mcpIncludeKeyIndex = mcpSection.search(/^\s*include:\s*$/m);
-const mcpExcludeKeyIndex = mcpSection.search(/^\s*exclude:\s*$/m);
+const mcpIncludeKeyIndex = mcpSection.search(/^[ \t]*include:[ \t]*$/m);
+const mcpExcludeKeyIndex = mcpSection.search(/^[ \t]*exclude:[ \t]*$/m);
 const mcpIncludeIds = getFilterIds(
   mcpSection.slice(mcpIncludeKeyIndex, mcpExcludeKeyIndex),
 );
