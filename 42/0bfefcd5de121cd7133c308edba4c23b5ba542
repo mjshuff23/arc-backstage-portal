@@ -1,0 +1,23 @@
+app-config.mcp-local.yaml
+  s_d930eec42bb99e::t_7f053edfb8b434 25-29
+README.md
+  s_d930eec42bb99e::t_cbf748dfa0a113 242
+scripts/check-issue-readiness.mjs
+  s_d930eec42bb99e::t_ddb1370469f4d7 464,467-469
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "420bfefcd5de121cd7133c308edba4c23b5ba542",
+  "prompts": {},
+  "sessions": {
+    "s_d930eec42bb99e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1791c39c-0d97-4590-abb1-89c870b37782",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
