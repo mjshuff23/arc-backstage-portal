@@ -1,0 +1,20 @@
+scripts/check-issue-readiness.mjs
+  s_d930eec42bb99e::t_2b921f23b8888c 384-387
+  s_d930eec42bb99e::t_0783a08909cf00 443-446,448-449
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "332bef3565293e838e099d02d67c0f57000c4dc6",
+  "prompts": {},
+  "sessions": {
+    "s_d930eec42bb99e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1791c39c-0d97-4590-abb1-89c870b37782",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
