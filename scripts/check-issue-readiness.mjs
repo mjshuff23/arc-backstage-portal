@@ -381,7 +381,10 @@ const hasMcpLocalConfig = fs.existsSync(path.join(root, mcpLocalConfigPath));
 const mcpLocalConfig = hasMcpLocalConfig ? readText(mcpLocalConfigPath) : '';
 const mcpSection = appConfig.slice(appConfig.indexOf('\nmcpActions:') + 1);
 function getFilterIds(block) {
-  return [...block.matchAll(/-\s*id:\s*'([^']+)'/g)].map(match => match[1]);
+  // Accept single-quoted, double-quoted, or unquoted YAML scalar values.
+  return [
+    ...block.matchAll(/-[ \t]*id:[ \t]*(?:'([^']+)'|"([^"]+)"|([^\s#'"]+))/g),
+  ].map(match => match[1] ?? match[2] ?? match[3]);
 }
 
 // Match the YAML keys on their own lines so prose in comments (which can
@@ -437,11 +440,13 @@ check(
 check(
   'MCP server include list is an explicit read-only allowlist',
   () =>
+    // Exact set equality: every reviewed id present, and nothing else. A new
+    // id (even a non-scaffolder one) must be reviewed and added to
+    // requiredMcpIncludeIds here before check:issue accepts it.
+    mcpIncludeIds.length === requiredMcpIncludeIds.length &&
     requiredMcpIncludeIds.every(id => mcpIncludeIds.includes(id)) &&
-    mcpIncludeIds.every(
-      id => !id.startsWith('scaffolder') && !id.includes('*'),
-    ),
-  'mcpActions include filter should list the five verified read-only action ids and avoid wildcards or scaffolder ids',
+    new Set(mcpIncludeIds).size === mcpIncludeIds.length,
+  'mcpActions include filter should list exactly the five verified read-only action ids — no extras, duplicates, wildcards, or scaffolder ids',
 );
 
 check(
