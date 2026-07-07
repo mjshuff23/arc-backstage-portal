@@ -1,0 +1,31 @@
+# Optional local/dev MCP client access.
+#
+# This file is a local development bridge only. It grants an external MCP
+# client (for example a coding agent) access to the read-only arcCatalog MCP
+# server using a static bearer token.
+#
+# Usage:
+#   1. Generate a token (never commit it):
+#        node -p 'require("crypto").randomBytes(24).toString("base64")'
+#   2. Export it as BACKSTAGE_MCP_TOKEN before starting the portal.
+#   3. Start the portal with:
+#        yarn start:arc:mcp
+#
+# The default `yarn start` and `yarn start:arc` paths do not load this file,
+# so the portal boots without any MCP client access configured.
+#
+# See https://backstage.io/docs/auth/service-to-service-auth#static-tokens
+backend:
+  auth:
+    externalAccess:
+      - type: static
+        options:
+          token: ${BACKSTAGE_MCP_TOKEN}
+          subject: arc-mcp-client
+        # Limit the token to the MCP actions endpoint only. The mcp-actions
+        # plugin invokes catalog/search actions with its own service
+        # identity, so the external token needs no direct reach into those
+        # plugins (verified at runtime: catalog and search tools work with
+        # this restriction in place).
+        accessRestrictions:
+          - plugin: mcp-actions

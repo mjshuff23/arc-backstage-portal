@@ -40,11 +40,18 @@ backend:
     client: better-sqlite3
     connection: ':memory:'
   # see https://backstage.io/docs/ai/mcp-actions#actions-configuration for more details
+  #
+  # Plugin sources feed the actions registry only; which actions are reachable
+  # by MCP clients is governed by the explicit allowlist under mcpActions
+  # below. `techdocs` is intentionally absent: the TechDocs backend currently
+  # registers no actions, so TechDocs pointers come from catalog entity
+  # annotations and `search.query` results instead.
   actions:
     pluginSources:
       - auth
       - catalog
       - scaffolder
+      - search
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 integrations:
@@ -140,6 +147,40 @@ permission:
   enabled: true
 
 # see https://backstage.io/docs/ai/mcp-actions for more details
+#
+# Focused read-only MCP server for coding agents. Defining `servers` replaces
+# the single default endpoint at /api/mcp-actions/v1 with one endpoint per
+# server, so only the arc-catalog server below is reachable:
+#   http://localhost:7007/api/mcp-actions/v1/arc-catalog
+#
+# Server keys must be lowercase alphanumeric with hyphens.
+#
+# Scaffolder/write actions are intentionally NOT exposed. Adding them requires
+# a separate safety review (see README "Read-only MCP context for agents").
 mcpActions:
-  name: 'My Company Backstage' # defaults to "backstage"
-  description: 'Tools for managing your software catalog, creating new services from templates, and exploring your developer portal' # optional
+  servers:
+    arc-catalog:
+      name: 'ARC Backstage Catalog'
+      description: 'Read-only ARC catalog, API, and TechDocs context for coding agents.'
+      filter:
+        # Explicit allowlist of verified read-only actions. Discovered at
+        # runtime from the actions registry (see README for the full
+        # inventory). Wildcards are deliberately avoided so a new write
+        # action added by a Backstage upgrade cannot appear here silently.
+        #
+        # Note: `search:query` is annotated readOnlyHint=true but
+        # destructiveHint=true upstream, so an attribute-based
+        # `exclude: {attributes: {destructive: true}}` rule would drop it;
+        # the explicit id allowlist is the reliable read-only filter.
+        include:
+          - id: 'catalog:get-catalog-model-description'
+          - id: 'catalog:get-catalog-entity'
+          - id: 'catalog:query-catalog-entities'
+          - id: 'catalog:validate-entity'
+          - id: 'search:query'
+        # Defense in depth: even if the include list is widened later, never
+        # expose scaffolder or catalog write actions from this server.
+        exclude:
+          - id: 'scaffolder:*'
+          - id: 'catalog:register-entity'
+          - id: 'catalog:unregister-entity'

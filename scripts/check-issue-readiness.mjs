@@ -376,6 +376,119 @@ check(
   'app-config.arc.yaml should register the neighboring ARC catalog-info.yaml and allow every ARC catalog kind',
 );
 
+const mcpLocalConfigPath = 'app-config.mcp-local.yaml';
+const hasMcpLocalConfig = fs.existsSync(path.join(root, mcpLocalConfigPath));
+const mcpLocalConfig = hasMcpLocalConfig ? readText(mcpLocalConfigPath) : '';
+const mcpSection = appConfig.slice(appConfig.indexOf('\nmcpActions:') + 1);
+function getFilterIds(block) {
+  // Accept single-quoted, double-quoted, or unquoted YAML scalar values.
+  return [
+    ...block.matchAll(/-[ \t]*id:[ \t]*(?:'([^']+)'|"([^"]+)"|([^\s#'"]+))/g),
+  ].map(match => match[1] ?? match[2] ?? match[3]);
+}
+
+// Match the YAML keys on their own lines so prose in comments (which can
+// mention include:/exclude:) does not shift the slice boundaries.
+const mcpIncludeKeyIndex = mcpSection.search(/^[ \t]*include:[ \t]*$/m);
+const mcpExcludeKeyIndex = mcpSection.search(/^[ \t]*exclude:[ \t]*$/m);
+const mcpIncludeIds = getFilterIds(
+  mcpSection.slice(mcpIncludeKeyIndex, mcpExcludeKeyIndex),
+);
+const mcpExcludeIds = getFilterIds(mcpSection.slice(mcpExcludeKeyIndex));
+const requiredMcpIncludeIds = [
+  'catalog:get-catalog-model-description',
+  'catalog:get-catalog-entity',
+  'catalog:query-catalog-entities',
+  'catalog:validate-entity',
+  'search:query',
+];
+const requiredMcpExcludeIds = [
+  'scaffolder:*',
+  'catalog:register-entity',
+  'catalog:unregister-entity',
+];
+const mcpReadmeSection = getMarkdownSection(
+  readme,
+  /^##\s+Read-only MCP context\b.*$/m,
+);
+
+check(
+  'package exposes MCP client startup command',
+  () =>
+    packageJson.scripts?.['start:arc:mcp'] ===
+    'backstage-cli repo start --config ../../app-config.yaml --config ../../app-config.arc.yaml --config ../../app-config.mcp-local.yaml',
+  'package.json should expose yarn start:arc:mcp layering app-config.mcp-local.yaml on top of the ARC configs',
+);
+
+check(
+  'default start paths do not load MCP client access config',
+  () =>
+    !packageJson.scripts?.start?.includes('mcp-local') &&
+    !packageJson.scripts?.['start:arc']?.includes('mcp-local'),
+  'yarn start and yarn start:arc should boot without app-config.mcp-local.yaml so no MCP client access is configured by default',
+);
+
+check(
+  'app config defines the focused arc-catalog MCP server',
+  () =>
+    appConfig.includes('\nmcpActions:') &&
+    mcpSection.includes('arc-catalog:') &&
+    !mcpSection.includes('arcCatalog'),
+  'app-config.yaml should define mcpActions.servers.arc-catalog (server keys must be lowercase alphanumeric with hyphens)',
+);
+
+check(
+  'MCP server include list is an explicit read-only allowlist',
+  () =>
+    // Exact set equality: every reviewed id present, and nothing else. A new
+    // id (even a non-scaffolder one) must be reviewed and added to
+    // requiredMcpIncludeIds here before check:issue accepts it.
+    mcpIncludeIds.length === requiredMcpIncludeIds.length &&
+    requiredMcpIncludeIds.every(id => mcpIncludeIds.includes(id)) &&
+    new Set(mcpIncludeIds).size === mcpIncludeIds.length,
+  'mcpActions include filter should list exactly the five verified read-only action ids — no extras, duplicates, wildcards, or scaffolder ids',
+);
+
+check(
+  'MCP server excludes scaffolder and catalog write actions',
+  () => requiredMcpExcludeIds.every(id => mcpExcludeIds.includes(id)),
+  'mcpActions exclude filter should keep scaffolder:*, catalog:register-entity, and catalog:unregister-entity out even if the include list widens',
+);
+
+check(
+  'MCP payload tracing stays disabled',
+  () => !appConfig.includes('toolPayload: true'),
+  'mcpActions.tracing.capture.toolPayload must stay off until a data-handling decision approves it',
+);
+
+check(
+  'MCP client access config is committed and env-var based',
+  () =>
+    hasMcpLocalConfig &&
+    mcpLocalConfig.includes('${BACKSTAGE_MCP_TOKEN}') &&
+    mcpLocalConfig.includes('subject: arc-mcp-client') &&
+    mcpLocalConfig.includes('externalAccess') &&
+    mcpLocalConfig.includes('accessRestrictions') &&
+    mcpLocalConfig.includes('plugin: mcp-actions') &&
+    !mcpLocalConfig.includes('plugin: catalog'),
+  'app-config.mcp-local.yaml should grant static-token access via the BACKSTAGE_MCP_TOKEN env var under the arc-mcp-client subject, restricted to the mcp-actions plugin only (downstream actions run under the plugin service identity)',
+);
+
+check(
+  'README documents the read-only MCP server for agents',
+  () =>
+    matchesAll(mcpReadmeSection, [
+      /\/api\/mcp-actions\/v1\/arc-catalog/,
+      /BACKSTAGE_MCP_TOKEN/,
+      /Intentionally not exposed/i,
+      /scaffolder/i,
+      /catalog:register-entity/,
+      /toolPayload/,
+      /code-intelligence/i,
+    ]),
+  'README should document the arc-catalog endpoint, env-var-only token setup, excluded actions, tracing posture, and Backstage MCP vs ARC code-intelligence guidance',
+);
+
 const failed = checks.filter(item => !item.passed);
 
 for (const item of checks) {
