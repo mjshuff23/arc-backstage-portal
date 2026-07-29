@@ -41,7 +41,7 @@
   ],
   "devDependencies": {
     "@backstage/cli": "^0.36.5-next.0",
-    "@backstage/cli-defaults": "0.1.4-next.1",
+    "@backstage/cli-defaults": "0.1.4",
     "@backstage/e2e-test-utils": "^0.1.2",
     "@jest/environment-jsdom-abstract": "^30.4.1",
     "@playwright/test": "^1.62.0",
