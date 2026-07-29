@@ -1,0 +1,21 @@
+package.json
+  s_4714aa10435239::t_2ece540ac22109 44
+yarn.lock
+  s_4714aa10435239::t_8ca5d03e7ba52b 2460,4094,27141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "21c3446cbdd7965fb469db6e650ee3e29b6921df",
+  "prompts": {},
+  "sessions": {
+    "s_4714aa10435239": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "68aa4087-f77a-4960-9959-014873485d6d",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Michael Shuff <mjshuff23@gmail.com>"
+    }
+  }
+}
