@@ -46,11 +46,11 @@
     "@backstage/plugin-techdocs-backend": "^2.2.2-next.0",
     "app": "link:../app",
     "better-sqlite3": "^12.11.1",
-    "node-gyp": "^13.0.0",
+    "node-gyp": "^13.0.1",
     "pg": "^8.22.0"
   },
   "devDependencies": {
-    "@backstage/cli": "^0.36.4-next.1",
+    "@backstage/cli": "^0.36.5-next.0",
     "jest": "^30.4.2"
   },
   "files": [
