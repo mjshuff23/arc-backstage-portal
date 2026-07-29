@@ -14,7 +14,7 @@
     "lint": "backstage-cli package lint"
   },
   "dependencies": {
-    "@backstage/cli": "^0.36.4-next.1",
+    "@backstage/cli": "^0.36.5-next.0",
     "@backstage/core-components": "^0.18.12-next.0",
     "@backstage/core-plugin-api": "^1.12.8-next.0",
     "@backstage/frontend-defaults": "^0.5.4-next.0",
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@backstage/frontend-test-utils": "^0.6.2-next.0",
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
